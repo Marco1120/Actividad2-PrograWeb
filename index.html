@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registro</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+         <div class="titulo">
+            <h1>Registro</h1>
+            <p class="subtitulo">Completa tus datos para crear tu cuenta.</p>
+ 
+            <form id="formulario" novalidate>
+                <div class="campo">
+                    <label for="nombre">Nombre completo</label>
+                    <input type="text" id="nombre" placeholder="Ej: Antonio Jiménez" autocomplete="name">
+                    <p class="error" id="error-nombre"></p>
+                </div>
+ 
+                <div class="correo">
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" placeholder="Ej: marco@ejemplo.com" autocomplete="email">
+                    <p class="error" id="error-correo"></p>
+                </div>
+
+                <div class="campo">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="Ej: 9511234567" inputmode="numeric" autocomplete="tel">
+                    <p class="ayuda">Solo dígitos, máximo 10.</p>
+                    <p class="error" id="error-telefono"></p>
+                </div>
+
+                <div class="campo">
+                    <label for="curp">CURP</label>
+                    <input type="text" id="curp" placeholder="Ej: GOMA900215HOCMRR08" maxlength="18">
+                    <p class="error" id="error-curp"></p>
+                </div>
+ 
+                <div class="campo">
+                    <label for="nacimiento">Fecha de nacimiento</label>
+                    <input type="date" id="nacimiento">
+                    <p class="error" id="error-nacimiento"></p>
+                </div>
+ 
+                <button type="submit" class="btn-principal">Registrarme</button>
+            </form>
+        </div>
+        <p class="enlace"><a href="login.html">¿Ya tienes cuenta? Inicia sesión</a></p>
+ 
+        <!-- Modal: muestra la edad calculada -->
+        <div class="modal-fondo" id="modal" aria-hidden="true">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <h2 id="modal-titulo">Registro correcto</h2>
+                <p class="detalle" id="modal-nombre"></p>
+                <p class="edad" id="modal-edad"></p>
+                <p class="detalle" id="modal-detalle"></p>
+                <button type="button" class="btn-principal" id="modal-cerrar">Cerrar</button>
+            </div>
+        </div>
+
+        <script src="js/utileria.js"></script>
+        <script>
+            function marcar(id, mensaje) {
+                var input = document.getElementById(id);
+                document.getElementById("error-" + id).textContent = mensaje;
+                input.classList.toggle("invalido", mensaje !== "");
+                input.classList.toggle("valido", mensaje === "" && input.value !== "");
+            }
+
+            function abrirModal(nombre, nacimiento) {
+                var edad = calcularEdad(nacimiento);
+                var dias = diasParaCumpleanos(nacimiento);
+
+                document.getElementById("modal-nombre").textContent = nombre;
+                document.getElementById("modal-edad").textContent = edad;
+                document.getElementById("modal-detalle").textContent =
+                    "años cumplidos · " + (dias === 0 ? "¡hoy es tu cumpleaños!" : "faltan " + dias + " días para tu cumpleaños");
+
+                var modal = document.getElementById("modal");
+                modal.classList.add("abierto");
+                modal.setAttribute("aria-hidden", "false");
+                document.getElementById("modal-cerrar").focus();
+            }
+
+            function cerrarModal() {
+                var modal = document.getElementById("modal");
+                modal.classList.remove("abierto");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            document.getElementById("formulario").addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                var nombre = document.getElementById("nombre").value.trim();
+                var correo = document.getElementById("correo").value.trim();
+                var telefono = document.getElementById("telefono").value.trim();
+                var curp = document.getElementById("curp").value.trim();
+                var nacimiento = document.getElementById("nacimiento").value;
+
+                var nombreOk = soloLetras(nombre);
+                var correoOk = validarCorreo(correo);
+                var telefonoOk = validarLongitud(telefono, 10);
+                var curpOk = validarCURP(curp);
+                var nacimientoOk = nacimiento !== "" && esMayorDeEdad(nacimiento);
+
+                marcar("nombre", nombreOk ? "" : "Escribe solo letras y espacios.");
+                marcar("correo", correoOk ? "" : "Escribe un correo válido, por ejemplo nombre@dominio.com.");
+                marcar("telefono", telefonoOk ? "" : "Escribe solo dígitos, máximo 10.");
+                marcar("curp", curpOk ? "" : "El formato de la CURP no es válido.");
+                marcar("nacimiento", nacimientoOk ? "" : "Debes ser mayor de edad para registrarte.");
+
+                if (nombreOk && correoOk && telefonoOk && curpOk && nacimientoOk) {
+                    abrirModal(nombre, nacimiento);
+                }
+            });
+
+            document.getElementById("modal-cerrar").addEventListener("click", cerrarModal);
+            document.getElementById("modal").addEventListener("click", function (e) {
+                if (e.target === this) cerrarModal();
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") cerrarModal();
+            });
+        </script>
+    </body>
+</html>
